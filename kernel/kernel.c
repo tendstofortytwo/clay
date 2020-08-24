@@ -63,6 +63,11 @@ void terminalPutAtCoords(char c, uint8_t color, size_t x, size_t y) {
     terminalBuffer[idx] = vgaEntry(c, color);
 }
 
+char terminalCharFromCoords(size_t x, size_t y) {
+    const size_t idx = (y * VGA_WIDTH) + x;
+    return (char) (terminalBuffer[idx] & 0x00ff);
+}
+
 void terminalInit() {
     terminalRow = 0;
     terminalCol = 0;
@@ -80,13 +85,44 @@ void terminalSetColor(uint8_t color) {
     terminalColor = color;
 }
 
-void terminalPutChar(char c) {
-    terminalPutAtCoords(c, terminalColor, terminalCol, terminalRow);
+void terminalNextLine() {
+    // if we are at the last line and we
+    // want to go to the "next line", we
+    // loop through each row other than 
+    // the first, and copy it into the 
+    // row above it. then we overwrite
+    // the last row (which should have
+    // been duplicated into second last)
+    // with empty characters
+    if(terminalRow == VGA_HEIGHT - 1) {
+        for(size_t y = 1; y <= terminalRow; ++y) {
+            for(size_t x = 0; x < VGA_WIDTH; ++x) {
+                char c = terminalCharFromCoords(x, y);
+                terminalPutAtCoords(c, terminalColor, x, y - 1);
+            }
+        }
+        for(size_t x = 0; x < VGA_WIDTH; ++x) {
+            terminalPutAtCoords(' ', terminalColor, x, terminalRow);
+        }
+    }
+    // if we are not at the last line, just
+    // go to the next line
+    else {
+        ++terminalRow;
+    }
 
-    if(++terminalCol == VGA_WIDTH) {
-        terminalCol = 0;
-        if(++terminalRow == VGA_HEIGHT) {
-            terminalRow = 0;
+    terminalCol = 0;
+}
+
+void terminalPutChar(char c) {
+    if(c == '\n') {
+        terminalNextLine();
+    }
+    else {
+        terminalPutAtCoords(c, terminalColor, terminalCol, terminalRow);
+
+        if(++terminalCol == VGA_WIDTH) {
+            terminalNextLine();
         }
     }
 }
@@ -104,4 +140,13 @@ void kernel_main(void) {
     terminalInit();
 
     terminalWriteStr("Hello, world!\n");
+    terminalWriteStr("This is Clay.\n");
+
+    // write a bunch of lines to test scrolling
+    for(uint32_t i = 0; i < 25; ++i) {
+        terminalWriteStr("Testing line ");
+        terminalPutChar('0' + ((i/10)%10) );
+        terminalPutChar('0' + (i%10) );
+        terminalPutChar('\n');
+    }
 }

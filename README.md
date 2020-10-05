@@ -10,21 +10,21 @@
 
 ## Build and run
 
+    # Load environment
+    source setup/prefix.sh
+
     # Install dependencies (one-time)
     setup/build-binutils.sh
     setup/build-gcc.sh
-
-    # Load environment
-    source setup/prefix.sh
 
     # Build kernel
     cd kernel
     make
 
     # Run on QEMU
-    qemu-system-i386 -cdrom clay.iso
+    qemu-system-i386 -cdrom build/clay.iso
 
-## Sources
+## Resources
 
 * OSDev wiki: https://wiki.osdev.org
 * OSDev subreddit: https://reddit.com/r/OSDev

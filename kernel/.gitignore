@@ -1,4 +1,4 @@
 *.o
 *.iso
 *.bin
-iso/
+build/

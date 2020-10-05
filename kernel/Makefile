@@ -4,43 +4,48 @@ CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra
 AS=i686-elf-as
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
-OBJECTS=kernel.o boot.o vga.o
+BUILDDIR=build
+SYSROOT=$(BUILDDIR)/sysroot
+ISO=$(BUILDDIR)/clay.iso
 
-BINARY=kernel.bin
+OBJECTS= \
+$(BUILDDIR)/kernel.c.o \
+$(BUILDDIR)/boot.s.o \
+$(BUILDDIR)/vga/vga.c.o
 
-ISO=clay.iso
-ISODIR=iso
+BINARY=$(BUILDDIR)/kernel.bin
 
-iso: binary
-	mkdir -p $(ISODIR)/boot/grub
-	cp $(BINARY) $(ISODIR)/boot/
-	cp grub.cfg $(ISODIR)/boot/grub/
-	grub-mkrescue -o $(ISO) $(ISODIR)
+.PHONY: iso clean all
 
-binary: $(OBJECTS) linker.ld
+$(ISO): $(BINARY)
+	mkdir -p $(SYSROOT)/boot/grub
+	cp $(BINARY) $(SYSROOT)/boot/
+	cp grub.cfg $(SYSROOT)/boot/grub/
+	grub-mkrescue -o $(ISO) $(SYSROOT)
+
+$(BINARY): $(OBJECTS) linker.ld
+	mkdir -p $(@D)
 	$(CC) \
 		-T linker.ld \
 		-o $(BINARY) \
 		$(OBJECTS) \
 		$(LFLAGS)
 
-kernel.o: kernel.c
+$(BUILDDIR)/%.c.o: %.c
+	mkdir -p $(@D)
 	$(CC) \
-		-c kernel.c \
-		-o kernel.o \
+		-c $< \
+		-o $@ \
 		$(CFLAGS)
 
-vga.o: vga/vga.c
-	$(CC) \
-		-c vga/vga.c \
-		-o vga.o \
-		$(CFLAGS)
+$(BUILDDIR)/%.s.o: %.s
+	mkdir -p $(@D)
+	$(AS) \
+		$< \
+		-o $@
 
 boot.o: boot.s
-	$(AS) \
-		boot.s \
-		-o boot.o
 
 clean:
-	$(RM) $(OBJECTS) $(BINARY) $(ISO)
-	$(RM) -r $(ISODIR)
+	$(RM) -r $(BUILDDIR)
+

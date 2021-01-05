@@ -17,10 +17,14 @@ void kernel_main(void) {
     terminalWriteStr("This is Clay.\n");
 
     // write a bunch of lines to test scrolling
-    for(uint32_t i = 0; i < 25; ++i) {
-        terminalWriteStr("Testing line ");
-        terminalPutChar('0' + ((i/10)%10) );
-        terminalPutChar('0' + (i%10) );
-        terminalPutChar('\n');
+    for(int32_t i = 0; i < 25; ++i) {
+        terminalPrintf("Testing line %d\n", i);
     }
+
+    terminalPrintf("Testing string output, \"%s\"\n", "lmao");
+    terminalPrintf("Testing character output, \'%c\'\n", '*');
+    terminalPrintf("Testing literal percent sign, %%\n");
+    terminalPrintf("Testing binary number, %b\n", 42);
+    terminalPrintf("Testing hex number, %h\n", 0x1a2b3c4d);
+    terminalPrintf("Testing invalid formatter %P\n");
 }

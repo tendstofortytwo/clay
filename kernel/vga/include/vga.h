@@ -34,3 +34,4 @@ void terminalNextLine();
 void terminalPutChar(char);
 void terminalWrite(const char *, size_t);
 void terminalWriteStr(const char *);
+void terminalPrintf(const char *, ...);

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdarg.h>
 #include "include/vga.h"
 
 size_t terminalRow;
@@ -103,4 +104,86 @@ void terminalWrite(const char *s, size_t l) {
 
 void terminalWriteStr(const char *s) {
     terminalWrite(s, strlen(s));
+}
+
+void terminalWriteNumber(int32_t n, uint32_t base) {
+    if(n < 0) {
+        n = -n;
+        terminalPutChar('-');
+    }
+    else if(n == 0) {
+        terminalPutChar('0');
+        return;
+    }
+
+    // should be enough to fit 32-bit INT_MAX
+    // there may be better ways to do this
+    int8_t digits[10];
+    int8_t dCount = 0;
+
+    while(n != 0) {
+        digits[dCount++] = (n % base);
+        n /= base;
+    }
+
+    while(dCount > 0) {
+        char ch = digits[--dCount];
+        if(ch < 10) ch += '0';
+        else ch = (ch - 10) + 'a';
+        terminalPutChar(ch);
+    }
+}
+
+/*
+custom printf-like function
+supports following format specifiers
+ * `%d` - decimal int
+ * `%b` - binary int
+ * `%h` - hex int
+ * `%c` - character
+ * `%s` - string
+this should be enough to get us to a libc, where
+we can use an actual printf
+*/
+void terminalPrintf(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    while(*fmt != '\0') {
+        if(*fmt == '%') {
+            char next = *(fmt+1);
+            if(next == '%') {
+                terminalPutChar(next);
+            }
+            else if(next == 'd') {
+                int32_t i = va_arg(args, int32_t);
+                terminalWriteNumber(i, 10);
+            }
+            else if(next == 'h') {
+                int32_t i = va_arg(args, int32_t);
+                terminalWriteNumber(i, 16);
+            }
+            else if(next == 'b') {
+                int32_t i = va_arg(args, int32_t);
+                terminalWriteNumber(i, 2);
+            }
+            else if(next == 'c') {
+                int32_t c = va_arg(args, int32_t);
+                terminalPutChar(c);
+            }
+            else if(next == 's') {
+                char *s = va_arg(args, char*);
+                terminalWriteStr(s);
+            }
+            else {
+                terminalPutChar('%');
+                terminalPutChar(next);
+            }
+            fmt += 2;
+        }
+        else {
+            terminalPutChar(*fmt);
+            ++fmt;
+        }
+    }
 }

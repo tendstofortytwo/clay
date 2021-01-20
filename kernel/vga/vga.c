@@ -34,7 +34,7 @@ char terminalCharFromCoords(size_t x, size_t y) {
 void terminalInit() {
     terminalRow = 0;
     terminalCol = 0;
-    terminalColor = vgaEntryColor(VGA_LIGHT_GREY, VGA_BLACK);
+    terminalColor = VGA_DEFAULT_ENTRYCOLOR;
     terminalBuffer = (uint16_t*) 0xb8000;
 
     for(size_t y = 0; y < VGA_HEIGHT; ++y) {
@@ -133,8 +133,13 @@ void terminalWriteNumber(int32_t n, uint32_t base) {
 }
 
 /*
-custom printf-like function
-supports following format specifiers
+custom printf-like functions
+we have
+* vprintf - takes va_list
+* printf - takes ..., wraps vprintf
+* colorPrintf - takes ..., wraps vprintf
+
+they support following format specifiers
  * `%d` - decimal int [signed]
  * `%i` - decimal int [signed]
  * `%u` - decimal int [unsigned]
@@ -146,10 +151,8 @@ supports following format specifiers
 this should be enough to get us to a libc, where
 we can use an actual printf
 */
-void terminalPrintf(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
 
+void terminalVprintf(const char *fmt, va_list args) {
     while(*fmt != '\0') {
         if(*fmt == '%') {
             char next = *(fmt+1);
@@ -195,4 +198,22 @@ void terminalPrintf(const char *fmt, ...) {
             ++fmt;
         }
     }
+}
+
+void terminalPrintf(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    terminalVprintf(fmt, args);
+    va_end(args);
+}
+
+void terminalColorPrintf(uint8_t c, const char *fmt, ...) {
+    terminalSetColor(c);
+
+    va_list args;
+    va_start(args, fmt);
+    terminalVprintf(fmt, args);
+    va_end(args);
+
+    terminalSetColor(VGA_DEFAULT_ENTRYCOLOR);
 }

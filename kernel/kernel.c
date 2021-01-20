@@ -14,7 +14,10 @@ void kernel_main(void) {
     terminalInit();
 
     terminalPrintf("Hello, world!\n");
-    terminalPrintf("This is Clay.\n\n");
+    
+    terminalPrintf("This is ");
+    terminalColorPrintf(vgaEntryColor(VGA_CYAN, VGA_BLACK), "Clay");
+    terminalPrintf(".\n\n");
 
     terminalPrintf("Testing string and character output, \"%s\" and \'%c\'\n", "lmao", '*');
     terminalPrintf("Testing literal percent sign, %%\n");

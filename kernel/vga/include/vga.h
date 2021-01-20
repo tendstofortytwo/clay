@@ -26,6 +26,8 @@ static inline uint8_t vgaEntryColor(enum VGAColor fg, enum VGAColor bg) {
     return (bg << 4) | fg;
 }
 
+static const uint8_t VGA_DEFAULT_ENTRYCOLOR = (VGA_BLACK << 4) | VGA_LIGHT_GREY;
+
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 
@@ -34,3 +36,4 @@ void terminalSetColor(uint8_t);
 void terminalPutChar(char);
 void terminalWriteStr(const char *);
 void terminalPrintf(const char *, ...);
+void terminalColorPrintf(uint8_t, const char *, ...);

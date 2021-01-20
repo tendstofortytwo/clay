@@ -9,13 +9,15 @@ SYSROOT=$(BUILDDIR)/sysroot
 ISO=$(BUILDDIR)/clay.iso
 
 OBJECTS= \
-$(BUILDDIR)/kernel.c.o \
-$(BUILDDIR)/boot.s.o \
-$(BUILDDIR)/vga/vga.c.o
+	$(BUILDDIR)/kernel.c.o \
+	$(BUILDDIR)/boot.s.o \
+	$(BUILDDIR)/vga/vga.c.o
 
 BINARY=$(BUILDDIR)/kernel.bin
 
-.PHONY: iso clean all
+.PHONY: iso clean
+
+iso: $(ISO)
 
 $(ISO): $(BINARY)
 	mkdir -p $(SYSROOT)/boot/grub

@@ -20,18 +20,17 @@ enum VGAColor {
     VGA_WHITE = 15
 };
 
+// a color is a byte - first four bits are the background,
+// next four bits are the foreground
+static inline uint8_t vgaEntryColor(enum VGAColor fg, enum VGAColor bg) {
+    return (bg << 4) | fg;
+}
+
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 
-static inline uint8_t vgaEntryColor(enum VGAColor, enum VGAColor);
-static inline uint16_t vgaEntry(unsigned char, uint8_t);
-
 void terminalInit();
-void terminalPutAtCoords(char, uint8_t, size_t, size_t);
-char terminalCharFromCoords(size_t, size_t);
 void terminalSetColor(uint8_t);
-void terminalNextLine();
 void terminalPutChar(char);
-void terminalWrite(const char *, size_t);
 void terminalWriteStr(const char *);
 void terminalPrintf(const char *, ...);

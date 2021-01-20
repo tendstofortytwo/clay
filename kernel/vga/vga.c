@@ -15,13 +15,6 @@ size_t strlen(const char* str) {
     return len;
 }
 
-
-// a color is a byte - first four bits are the background,
-// next four bits are the foreground
-static inline uint8_t vgaEntryColor(enum VGAColor fg, enum VGAColor bg) {
-    return (bg << 4) | fg;
-}
-
 // an "entry" is two bytes - first byte is the color,
 // second byte is the entry
 static inline uint16_t vgaEntry(unsigned char ch, uint8_t color) {
@@ -41,7 +34,7 @@ char terminalCharFromCoords(size_t x, size_t y) {
 void terminalInit() {
     terminalRow = 0;
     terminalCol = 0;
-    terminalColor = vgaEntryColor(VGA_LIGHT_CYAN, VGA_BLACK);
+    terminalColor = vgaEntryColor(VGA_LIGHT_GREY, VGA_BLACK);
     terminalBuffer = (uint16_t*) 0xb8000;
 
     for(size_t y = 0; y < VGA_HEIGHT; ++y) {
@@ -106,12 +99,8 @@ void terminalWriteStr(const char *s) {
     terminalWrite(s, strlen(s));
 }
 
-void terminalWriteNumber(int32_t n, uint32_t base) {
-    if(n < 0) {
-        n = -n;
-        terminalPutChar('-');
-    }
-    else if(n == 0) {
+void terminalWriteUnsignedNumber(uint32_t n, uint32_t base) {
+    if(n == 0) {
         terminalPutChar('0');
         return;
     }
@@ -134,12 +123,24 @@ void terminalWriteNumber(int32_t n, uint32_t base) {
     }
 }
 
+void terminalWriteNumber(int32_t n, uint32_t base) {
+    if(n < 0) {
+        n = -n;
+        terminalPutChar('-');
+    }
+
+    terminalWriteUnsignedNumber(n, base);
+}
+
 /*
 custom printf-like function
 supports following format specifiers
- * `%d` - decimal int
- * `%b` - binary int
- * `%h` - hex int
+ * `%d` - decimal int [signed]
+ * `%i` - decimal int [signed]
+ * `%u` - decimal int [unsigned]
+ * `%b` - binary int [unsigned]
+ * `%o` - octal int [unsigned]
+ * `%x` - hex int [unsigned]
  * `%c` - character
  * `%s` - string
 this should be enough to get us to a libc, where
@@ -155,17 +156,25 @@ void terminalPrintf(const char *fmt, ...) {
             if(next == '%') {
                 terminalPutChar(next);
             }
-            else if(next == 'd') {
+            else if(next == 'd' || next == 'i') {
                 int32_t i = va_arg(args, int32_t);
                 terminalWriteNumber(i, 10);
             }
-            else if(next == 'h') {
-                int32_t i = va_arg(args, int32_t);
-                terminalWriteNumber(i, 16);
+            else if(next == 'u') {
+                uint32_t i = va_arg(args, uint32_t);
+                terminalWriteUnsignedNumber(i, 10);
+            }
+            else if(next == 'x') {
+                uint32_t i = va_arg(args, uint32_t);
+                terminalWriteUnsignedNumber(i, 16);
             }
             else if(next == 'b') {
-                int32_t i = va_arg(args, int32_t);
-                terminalWriteNumber(i, 2);
+                uint32_t i = va_arg(args, uint32_t);
+                terminalWriteUnsignedNumber(i, 2);
+            }
+            else if(next == 'o') {
+                uint32_t i = va_arg(args, uint32_t);
+                terminalWriteUnsignedNumber(i, 8);
             }
             else if(next == 'c') {
                 int32_t c = va_arg(args, int32_t);

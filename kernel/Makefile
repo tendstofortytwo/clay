@@ -17,7 +17,7 @@ BINARY=$(BUILDDIR)/kernel.bin
 
 .PHONY: iso clean
 
-iso: $(ISO)
+iso: $(OBJECTS) $(BINARY) $(ISO)
 
 $(ISO): $(BINARY)
 	mkdir -p $(SYSROOT)/boot/grub
@@ -45,8 +45,6 @@ $(BUILDDIR)/%.s.o: %.s
 	$(AS) \
 		$< \
 		-o $@
-
-boot.o: boot.s
 
 clean:
 	$(RM) -r $(BUILDDIR)

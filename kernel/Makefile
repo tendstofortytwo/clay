@@ -1,3 +1,13 @@
+ifneq (, $(shell which grub-mkrescue 2>/dev/null))
+	GRUB_MKRESCUE=grub-mkrescue
+else
+	ifneq (, $(shell which grub2-mkrescue 2>/dev/null))
+	GRUB_MKRESCUE=grub2-mkrescue
+	else
+	$(error "cannot find grub-mkrescue in PATH")
+	endif
+endif
+
 CC=i686-elf-gcc
 CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
@@ -23,7 +33,7 @@ $(ISO): $(BINARY)
 	mkdir -p $(SYSROOT)/boot/grub
 	cp $(BINARY) $(SYSROOT)/boot/
 	cp grub.cfg $(SYSROOT)/boot/grub/
-	grub-mkrescue -o $(ISO) $(SYSROOT)
+	$(GRUB_MKRESCUE) -o $(ISO) $(SYSROOT)
 
 $(BINARY): $(OBJECTS) linker.ld
 	mkdir -p $(@D)

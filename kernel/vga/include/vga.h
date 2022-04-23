@@ -1,3 +1,6 @@
+#ifndef CLAY_VGA_H
+#define CLAY_VGA_H
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -37,3 +40,5 @@ void terminalPutChar(char);
 void terminalWriteStr(const char *);
 void terminalPrintf(const char *, ...);
 void terminalColorPrintf(uint8_t, const char *, ...);
+
+#endif

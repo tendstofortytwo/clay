@@ -21,7 +21,9 @@ ISO=$(BUILDDIR)/clay.iso
 OBJECTS= \
 	$(BUILDDIR)/kernel.c.o \
 	$(BUILDDIR)/boot.s.o \
-	$(BUILDDIR)/vga/vga.c.o
+	$(BUILDDIR)/vga/vga.c.o \
+	$(BUILDDIR)/boot/gdt.c.o \
+	$(BUILDDIR)/boot/gdt.s.o
 
 BINARY=$(BUILDDIR)/kernel.bin
 

@@ -11,22 +11,25 @@ and stdint provides intX_t and uintX_t types.
 #include "vga/include/vga.h"
 
 void kernel_main(void) {
-    terminalInit();
+    kterminit();
 
-    terminalPrintf("Hello, world!\n");
+    kprintf("Hello, world!\n");
     
-    terminalPrintf("This is ");
-    terminalColorPrintf(vgaEntryColor(VGA_CYAN, VGA_BLACK), "Clay");
-    terminalPrintf(".\n\n");
+    kprintf("This is ");
+    kcprintf(vgaColor(VGA_CYAN, VGA_BLACK), "Clay");
+    kprintf(".\n\n");
 
-    terminalPrintf("Testing string and character output, \"%s\" and \'%c\'\n", "lmao", '*');
-    terminalPrintf("Testing literal percent sign, %%\n");
-    terminalPrintf("Testing binary number, 0b%b\n", 42);
-    terminalPrintf("Testing octal number, 0%o\n", 69);
-    terminalPrintf("Testing unsigned decimal number, %u\n", 2147483648);
-    terminalPrintf("Testing signed decimal number, %d or %i\n", -100, 100);
-    terminalPrintf("Testing hex number, 0x%x\n", 0xf00dcafe);
-    terminalPrintf("Testing invalid formatter %P\n");
+    kprintf("Testing string and character output, \"%s\" and \'%c\'\n", "lmao", '*');
+    kprintf("Testing literal percent sign, %%\n");
+    kprintf("Testing binary number, 0b%b\n", 42);
+    kprintf("Testing octal number, 0%o\n", 69);
+    kprintf("Testing unsigned decimal number, %u\n", 2147483648);
+    kprintf("Testing signed decimal number, %d or %i\n", -100, 100);
+    kprintf("Testing hex number, 0x%x\n", 0xf00dcafe);
+    kprintf("Testing invalid formatter %P\n");
 
-    for(;;);
+
+    for(int i = 0; i < 14; i++) {
+        kprintf("Testing scrolling: line %d\n", i);
+    }
 }

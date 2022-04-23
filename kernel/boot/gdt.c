@@ -6,7 +6,7 @@
 void fill_gdt_row(GDTRow* target, GDTContents* source) {
     if(source->limit > 0xFFFFF) {
         // todo: write a kerror() function for this
-        terminalColorPrintf(vgaEntryColor(VGA_RED, VGA_BLACK), "Invalid GDT limit %d\n", source->limit);
+        kerror("Invalid GDT limit %d\n", source->limit);
         for(;;);
     }
 

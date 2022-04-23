@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include "include/vga.h"
 
 size_t terminalRow;
@@ -7,6 +8,7 @@ size_t terminalCol;
 uint8_t terminalColor;
 uint16_t* terminalBuffer;
 
+bool didTermInit = false;
 
 // need a better place for this
 size_t strlen(const char* str) {
@@ -31,7 +33,12 @@ char terminalCharFromCoords(size_t x, size_t y) {
     return (char) (terminalBuffer[idx] & 0x00ff);
 }
 
-void terminalInit() {
+uint8_t terminalColorFromCoords(size_t x, size_t y) {
+    const size_t idx = (y * VGA_WIDTH) + x;
+    return (uint8_t) ((terminalBuffer[idx] & 0xff00) >> 8);
+}
+
+void kterminit() {
     terminalRow = 0;
     terminalCol = 0;
     terminalColor = VGA_DEFAULT_ENTRYCOLOR;
@@ -60,8 +67,9 @@ void terminalNextLine() {
     if(terminalRow == VGA_HEIGHT - 1) {
         for(size_t y = 1; y <= terminalRow; ++y) {
             for(size_t x = 0; x < VGA_WIDTH; ++x) {
-                char c = terminalCharFromCoords(x, y);
-                terminalPutAtCoords(c, terminalColor, x, y - 1);
+                char ch = terminalCharFromCoords(x, y);
+                uint8_t color = terminalColorFromCoords(x, y);
+                terminalPutAtCoords(ch, color, x, y - 1);
             }
         }
         for(size_t x = 0; x < VGA_WIDTH; ++x) {
@@ -77,7 +85,7 @@ void terminalNextLine() {
     terminalCol = 0;
 }
 
-void terminalPutChar(char c) {
+void kputchar(char c) {
     if(c == '\n') {
         terminalNextLine();
     }
@@ -92,16 +100,16 @@ void terminalPutChar(char c) {
 
 void terminalWrite(const char *s, size_t l) {
     for(size_t i = 0; i < l; ++i)
-        terminalPutChar(s[i]);
+        kputchar(s[i]);
 }
 
-void terminalWriteStr(const char *s) {
+void kputs(const char *s) {
     terminalWrite(s, strlen(s));
 }
 
 void terminalWriteUnsignedNumber(uint32_t n, uint32_t base) {
     if(n == 0) {
-        terminalPutChar('0');
+        kputchar('0');
         return;
     }
 
@@ -119,14 +127,14 @@ void terminalWriteUnsignedNumber(uint32_t n, uint32_t base) {
         char ch = digits[--dCount];
         if(ch < 10) ch += '0';
         else ch = (ch - 10) + 'a';
-        terminalPutChar(ch);
+        kputchar(ch);
     }
 }
 
 void terminalWriteNumber(int32_t n, uint32_t base) {
     if(n < 0) {
         n = -n;
-        terminalPutChar('-');
+        kputchar('-');
     }
 
     terminalWriteUnsignedNumber(n, base);
@@ -152,12 +160,12 @@ this should be enough to get us to a libc, where
 we can use an actual printf
 */
 
-void terminalVprintf(const char *fmt, va_list args) {
+void kvprintf(const char *fmt, va_list args) {
     while(*fmt != '\0') {
         if(*fmt == '%') {
             char next = *(fmt+1);
             if(next == '%') {
-                terminalPutChar(next);
+                kputchar(next);
             }
             else if(next == 'd' || next == 'i') {
                 int32_t i = va_arg(args, int32_t);
@@ -181,38 +189,48 @@ void terminalVprintf(const char *fmt, va_list args) {
             }
             else if(next == 'c') {
                 int32_t c = va_arg(args, int32_t);
-                terminalPutChar(c);
+                kputchar(c);
             }
             else if(next == 's') {
                 char *s = va_arg(args, char*);
-                terminalWriteStr(s);
+                kputs(s);
             }
             else {
-                terminalPutChar('%');
-                terminalPutChar(next);
+                kputchar('%');
+                kputchar(next);
             }
             fmt += 2;
         }
         else {
-            terminalPutChar(*fmt);
+            kputchar(*fmt);
             ++fmt;
         }
     }
 }
 
-void terminalPrintf(const char *fmt, ...) {
+void kprintf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    terminalVprintf(fmt, args);
+    kvprintf(fmt, args);
     va_end(args);
 }
 
-void terminalColorPrintf(uint8_t c, const char *fmt, ...) {
+void kcprintf(uint8_t c, const char *fmt, ...) {
     terminalSetColor(c);
 
     va_list args;
     va_start(args, fmt);
-    terminalVprintf(fmt, args);
+    kvprintf(fmt, args);
+    va_end(args);
+
+    terminalSetColor(VGA_DEFAULT_ENTRYCOLOR);
+}
+
+void kerror(const char *fmt, ...) {
+    terminalSetColor(vgaEntry(VGA_RED, VGA_BLACK));
+    va_list args;
+    va_start(args, fmt);
+    kvprintf(fmt, args);
     va_end(args);
 
     terminalSetColor(VGA_DEFAULT_ENTRYCOLOR);

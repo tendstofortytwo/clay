@@ -63,11 +63,18 @@ _start:
     global constructors and exceptions require runtime support to
     work as well.
     */
+    /* disable interrupts (re-enabled with sti below) */
+    cli
+
+    /* initialize the GDT */
+    call gdt_init
+
+    sti
 
 
     /*
     Enter the high-level kernel. The ABI requires top of stack to be
-    16-byte aligned at the tyime of the call instruction. Since
+    16-byte aligned at the time of the call instruction. Since
     the stack is at a 16 byte boundary as we have not pushed anything
     to the stack yet, we should be good.
     */
@@ -96,3 +103,23 @@ minus its start. This is useful when debugging or if we implement
 call tracing.
 */
 .size _start, . - _start
+
+.global load_gdt
+.type load_gdt, @function
+load_gdt:
+    lgdt (gp)
+    /* set the bit to enter protected mode */
+    mov %cr0, %eax
+    or $0x1, %eax
+    mov %eax, %cr0
+    /* this jump is needed to reload the code segment from the new GDT */
+    ljmp $0x08, $reload_code_segment /* 0x08 is offset of kernel code segment row in GDT */
+reload_code_segment:
+    /* now that code segment is reloaded, load the rest */
+    mov $0x10, %ax /* 0x10 is offset of kernel data segment row in GDT */
+    mov %ax, %ds
+    mov %ax, %es
+    mov %ax, %fs
+    mov %ax, %gs
+    mov %ax, %ss
+    ret

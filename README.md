@@ -10,6 +10,8 @@
 
 ## Build and run
 
+Install cross-compiler building dependencies from here: https://wiki.osdev.org/GCC_Cross-Compiler#Installing_Dependencies. Also install `xorriso`, `grub2-pc` and `qemu-system-x86` (or equivalent) packages to build and run ISO.
+
     # Load environment
     source setup/prefix.sh
 
@@ -17,12 +19,14 @@
     setup/build-binutils.sh
     setup/build-gcc.sh
 
-    # Build kernel
+    # Build kernel and ISO
     cd kernel
     make
 
     # Run on QEMU
-    qemu-system-i386 -cdrom build/clay.iso
+    # -d int produces debugging output on interrupts
+    # -no-reboot, -no-shutdown useful to catch CPU before it triple faults and resets
+    qemu-system-i386 -cdrom build/clay.iso -d int -no-reboot -no-shutdown
 
 ## Resources
 

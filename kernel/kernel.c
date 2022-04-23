@@ -97,10 +97,10 @@ void gdt_init(void) {
     }
 
     gp.base = (void*) GDT;
-    gp.limit = GDT_ROWS - 1;
+    gp.limit = (GDT_ROWS * sizeof(GDTRow)) - 1;
     terminalPrintf("gdt dump:\n");
     for(uint32_t i = 0; i < GDT_ROWS; ++i) {
-        uint8_t* row = (uint32_t*) (GDT+i);
+        uint8_t* row = (uint8_t*) (GDT+i);
         for(uint32_t j = 0; j < 8; ++j) {
             if(row[j] < 16) terminalPrintf("0");
             terminalPrintf("%x", (uint32_t) (row[j]));

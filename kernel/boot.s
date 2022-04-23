@@ -69,7 +69,7 @@ _start:
     /* initialize the GDT */
     call gdt_init
 
-    sti
+    /*sti /* need interrupt handler before we can enable interrupts */
 
 
     /*
@@ -113,7 +113,7 @@ load_gdt:
     or $0x1, %eax
     mov %eax, %cr0
     /* this jump is needed to reload the code segment from the new GDT */
-    ljmp $0x08, $reload_code_segment /* 0x08 is offset of kernel code segment row in GDT */
+    jmp $0x08, $reload_code_segment /* 0x08 is offset of kernel code segment row in GDT */
 reload_code_segment:
     /* now that code segment is reloaded, load the rest */
     mov $0x10, %ax /* 0x10 is offset of kernel data segment row in GDT */

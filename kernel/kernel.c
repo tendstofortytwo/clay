@@ -11,8 +11,6 @@ and stdint provides intX_t and uintX_t types.
 #include "vga/include/vga.h"
 
 void kernel_main(void) {
-    kterminit();
-
     kprintf("Hello, world!\n");
     
     kprintf("This is ");
@@ -27,9 +25,6 @@ void kernel_main(void) {
     kprintf("Testing signed decimal number, %d or %i\n", -100, 100);
     kprintf("Testing hex number, 0x%x\n", 0xf00dcafe);
     kprintf("Testing invalid formatter %P\n");
-
-
-    for(int i = 0; i < 14; i++) {
-        kprintf("Testing scrolling: line %d\n", i);
-    }
+    kprintf("Testing interrupts\n");
+    asm("int3");
 }

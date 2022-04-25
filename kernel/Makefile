@@ -9,7 +9,7 @@ else
 endif
 
 CC=i686-elf-gcc
-CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra
+CFLAGS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -mgeneral-regs-only -mno-red-zone
 
 AS=i686-elf-as
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
@@ -23,7 +23,9 @@ OBJECTS= \
 	$(BUILDDIR)/boot.s.o \
 	$(BUILDDIR)/vga/vga.c.o \
 	$(BUILDDIR)/boot/gdt.c.o \
-	$(BUILDDIR)/boot/gdt.s.o
+	$(BUILDDIR)/boot/gdt.s.o \
+	$(BUILDDIR)/boot/idt.c.o \
+	$(BUILDDIR)/boot/idt.s.o \
 
 BINARY=$(BUILDDIR)/kernel.bin
 

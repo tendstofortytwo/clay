@@ -63,14 +63,17 @@ _start:
     global constructors and exceptions require runtime support to
     work as well.
     */
-    /* disable interrupts (re-enabled with sti below) */
+    /* disable interrupts (idt_init will enable them once the IDT is setup) */
     cli
+
+    /* initialize the terminal */
+    call kterminit
 
     /* initialize the GDT */
     call gdt_init
 
-    /*sti /* need interrupt handler before we can enable interrupts */
-
+    /* initialize the IDT */
+    call idt_init
 
     /*
     Enter the high-level kernel. The ABI requires top of stack to be

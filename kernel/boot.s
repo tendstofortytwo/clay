@@ -75,6 +75,9 @@ _start:
     /* initialize the IDT */
     call idt_init
 
+    /* initialize the PICs */
+    call pic_remap
+
     /*
     Enter the high-level kernel. The ABI requires top of stack to be
     16-byte aligned at the time of the call instruction. Since
@@ -94,9 +97,7 @@ _start:
     3. Jump to the hlt instruction again if we get a non-maskable
     interrupt.
     */
-    cli
 l:
-    hlt
     jmp l
 
 

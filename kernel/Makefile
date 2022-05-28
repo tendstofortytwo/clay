@@ -26,6 +26,7 @@ OBJECTS= \
 	$(BUILDDIR)/boot/gdt.s.o \
 	$(BUILDDIR)/boot/idt.c.o \
 	$(BUILDDIR)/boot/idt.s.o \
+	$(BUILDDIR)/boot/pic.c.o \
 
 BINARY=$(BUILDDIR)/kernel.bin
 

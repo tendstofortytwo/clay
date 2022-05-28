@@ -1,5 +1,6 @@
 #include "include/idt.h"
 #include "../vga/include/vga.h"
+#include "include/pic.h"
 
 __attribute__((interrupt)) void helloWorld(IDTFrame* frame) {
     terminalSetColor(vgaColor(VGA_GREEN, VGA_BLACK));
@@ -13,6 +14,15 @@ __attribute__((interrupt)) void helloWorldErr(IDTFrameErr* frame) {
     kprintf("Hello from an error-based interrupt!\n");
     kprintf("Got ip=%x, cs=%x, flags=%b, err=%x\n", frame->ip, frame->cs, frame->flags, frame->err);
     terminalSetColor(VGA_DEFAULT_ENTRYCOLOR);
+    asm volatile("cli; hlt");
+}
+
+__attribute__((interrupt)) void timerTick(void* ptr) {
+    terminalSetColor(vgaColor(VGA_CYAN, VGA_BLACK));
+    kprintf("Hello from the timer!\n");
+    terminalSetColor(VGA_DEFAULT_ENTRYCOLOR);
+    pic_eoi(0);
+    io_wait();
 }
 
 void fill_idt_row(IDTRow* target, IDTContents* source) {
@@ -64,6 +74,9 @@ void idt_init(void) {
         { (uint32_t) helloWorld, 0x08, INT_GATE32, 0 },
         { (uint32_t) helloWorldErr, 0x08, INT_GATE32, 0 },
         { (uint32_t) helloWorld, 0x08, INT_GATE32, 0 },
+        { (uint32_t) timerTick, 0x08, INT_GATE32, 0 },
+        { (uint32_t) timerTick, 0x08, INT_GATE32, 0 },
+        { (uint32_t) timerTick, 0x08, INT_GATE32, 0 },
     };
 
     int validRows = sizeof(rows) / sizeof(IDTRow);

@@ -78,6 +78,9 @@ _start:
     /* initialize the PICs */
     call pic_remap
 
+    push $1
+    call pit_init
+
     /*
     Enter the high-level kernel. The ABI requires top of stack to be
     16-byte aligned at the time of the call instruction. Since
